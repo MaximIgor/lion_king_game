@@ -1,0 +1,54 @@
+[
+    {
+        "id": "1741033258242",
+        "item": {
+            "key": "1741033258242",
+            "ref": null,
+            "props": {},
+            "_owner": null,
+            "_store": {}
+        },
+        "top": 196,
+        "wid": 60,
+        "pos": 0
+    },
+    {
+        "id": "1741033261141",
+        "item": {
+            "key": "1741033261141",
+            "ref": null,
+            "props": {},
+            "_owner": null,
+            "_store": {}
+        },
+        "top": 25,
+        "wid": 25,
+        "pos": 1
+    },
+    {
+        "id": "1741033263162",
+        "item": {
+            "key": "1741033263162",
+            "ref": null,
+            "props": {},
+            "_owner": null,
+            "_store": {}
+        },
+        "top": 16,
+        "wid": 10,
+        "pos": 1
+    },
+    {
+        "id": "1741033265150",
+        "item": {
+            "key": "1741033265150",
+            "ref": null,
+            "props": {},
+            "_owner": null,
+            "_store": {}
+        },
+        "top": 160,
+        "wid": 0,
+        "pos": 0
+    }
+]
