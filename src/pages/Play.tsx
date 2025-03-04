@@ -3,27 +3,31 @@ import { Image } from "@/components/custom/image";
 import { Button } from "@/components/custom/button";
 import { ClaimModal } from "@/components/custom/claimModal";
 import { TelegramContext, TelegramUser } from '../contexts/TelegramContext';
+
 import {
   VectorLeftIcon,
   VectorRightIcon,
   HeartEmptyIcon,
   HeartIcon,
 } from "@/assets/icons";
-import { FootPrint, Boxlion_left, Boxlion_right } from "@/assets/imgs";
 
+import { FootPrint, Boxlion_left, Boxlion_right } from "@/assets/imgs";
 import coin from "@/components/items/Coin";
 import booster from "@/components/items/Booster";
 
-
-
-
 const Play = () => {
   const fianllyScore = 1000;
-  const [boosterIcons, setBoosterIcons] = useState<string[]>([]);
 
+  interface BoosterIcon {
+    url: string;
+    wid: number;
+    score: string;
+  }
+
+  const [time, setTime] = useState(0);
+  const [boosterIcons, setBoosterIcons] = useState<BoosterIcon[]>([]);
   const [currentScore, setCurrentScore] = useState(0);
   const [speed, setSpeed] = useState(1000);
-  const [timer, setTimer] = useState<NodeJS.Timeout | null>(null);
 
   const [showingItems, setShowingItems] = useState<{ id: string, item: React.ReactNode, wid: number, top: number, pos: number, location: number, score: any, url: any }[]>([]);
   const [health, setHealth] = useState([1, 1, 1, 1]);
@@ -48,96 +52,74 @@ const Play = () => {
   };
 
   const changePos = (direction: string, count: number, position: number) => {
-
     // 1 : 1 = 1
     // 1 : -1 = 0
     // -1 : 1 = 3
     // -1 : -1 = 2
-    showingItems.filter((item) => {
+    setPos({ direction });
+    [...showingItems].forEach((item) => {
       if (((count === 1 && position === 1) && item.location === 1) ||
         ((count === 1 && position === -1) && item.location === 0) ||
         ((count === -1 && position === 1) && item.location === 3) ||
         ((count === -1 && position === -1) && item.location === 2)
       ) {
-
         if (item.wid > 70 && item.wid < 90) {
-
+          setShowingItems((prevItems) =>
+            prevItems.filter(it => it !== item) // Remove this coin
+          );
           if (typeof item.score == `number`) {   // coin
-
             if (currentScore + item.score >= fianllyScore) {
               winOrFailModal('win');
               setCurrentScore(preScore => boosterScore2x ? preScore + item.score * 2 : preScore + item.score); // add the coin's score
-              return;
             }
-
-            setCurrentScore(preScore => boosterScore2x ? preScore + item.score * 2 : preScore + item.score); // add the coin's score
-            setShowingItems((prevItems) =>
-              prevItems.filter(it => it !== item) // Remove this coin
-            );
+            else {
+              setCurrentScore(preScore => boosterScore2x ? preScore + item.score * 2 : preScore + item.score); // add the coin's score
+            }
           }
-
           else {                            // booster coin
             if (item.score === 'x2') {
               console.log('x2 =====> 🚀', `x2`);
-              let timeFlag = false;
               setBoosterScore2x(true);
-              setShowingItems((prevItems) =>
-                prevItems.filter(it => it !== item) // Remove this booster coin
-              );
-              if (boosterIcons.includes(item.url)) {
-                timeFlag = true;
-              }
-              const handleTimeout = () => {
-                setTimeout(() => {
-                  setBoosterIcons(prevItem => {
-                    if (timeFlag) {
-                      timeFlag = false;
-                      handleTimeout(); // Restart the timeout if the flag is true
-                      return prevItem;
-                    } else {
-                      return [...prevItem].filter(it => it !== item.url);
-                    }
-                  });
-                  setBoosterScore2x(false);
-                }, 10000);
-              };
-
-              handleTimeout();
+              setTimeout(() => {
+                let width = item.wid;
+                setBoosterIcons(prevItem => {
+                  return [...prevItem].filter(it => it.url !== item.url || it.wid !== width);
+                });
+              }, 10000);
             }
 
-            else if (item.score === 'bomb') {
+            if (item.score === 'bomb') {
               console.log('bomb =====> 🚀', `bomb`);
               if (!boosterShield) {
                 setHealth(preHealth => preHealth.map((item) => 0))
                 winOrFailModal('lose');
-                return;
               }
             }
 
-            else if (item.score === 'speedup') {
+            if (item.score === 'speedup') {
               console.log('speedup =====> 🚀', `speedup`);
               setSpeed(speed + 1 + 10);
               setTimeout(() => {
-                setBoosterIcons(prevItem => [...prevItem].filter(it => it !== item.url))
-                setSpeed(speed + 1);
+                let width = item.wid;
+                setBoosterIcons(prevItem => [...prevItem].filter(it => it.url !== item.url || it.wid !== width))
               }, 10000)
             }
 
-            else if (item.score === 'slow') {
+            if (item.score === 'slow') {
               console.log('slow =====> 🚀', `slow`);
               setSpeed(speed + 1 - 10);
               setTimeout(() => {
-                setBoosterIcons(prevItem => [...prevItem].filter(it => it !== item.url))
-                setSpeed(speed + 1);
+                let width = item.wid;
+                setBoosterIcons(prevItem => [...prevItem].filter(it => it.url !== item.url || it.wid !== width))
               }, 10000)
             }
 
-            else if (item.score === 'fullhealth') {
+            if (item.score === 'fullhealth') {
               console.log('fullhealth =====> 🚀', `fullhealth`);
               setHealth(preHealth => preHealth.map((it) => 1))
             }
 
-            else if (item.score === 'health') {
+            if (item.score === 'health') {
               setHealth((preHealth) => {
                 let boosterHealth = true;
                 const newHealth = preHealth.map((it) => {
@@ -152,45 +134,70 @@ const Play = () => {
               })
             }
 
-            else if (item.score === 'shield') {
+            if (item.score === 'shield') {
               console.log('shield =====> 🚀', `shield`);
               setBoosterShield(true);
               setTimeout(() => {
-                setBoosterIcons(prevItem => [...prevItem].filter(it => it !== item.url))
-                setBoosterShield(false);
+                let width = item.wid;
+                setBoosterIcons(prevItem => [...prevItem].filter(it => it.url !== item.url || it.wid !== width))
               }, 10000)
             }
 
             if (item.score !== 'fullhealth' && item.score !== 'health' && item.score !== `bomb`) {
               setBoosterIcons(prevItems => {
-                if ([...prevItems].includes(item.url)) {
-                  prevItems = [...prevItems].filter(it => it !== item.url);
-                }
-                return [...prevItems, item.url]
+                let flage = true;
+                let result = [...prevItems].map((it) => {
+                  if (it.url === item.url) {
+                    it.wid = item.wid;
+                    flage = false;
+                  }
+                  return it;
+                })
+                return (flage) ? [...result, { url: item.url, wid: item.wid, score: item.score }] : [...result]
               })
             }
-
-            setShowingItems((prevItems) =>
-              prevItems.filter(it => it !== item) // Remove this booster coin
-            );
           }
-        }
-        else {
-          return;
+
+          setShowingItems(prevItem => prevItem.filter(it => it !== item))
+
         }
       }
     })
 
     // setSpeed(prevSpeed => prevSpeed + 1);
-    setPos({ direction });
   };
 
-  const createItem = () => {
+  useEffect(() => {
+    const x2result = boosterIcons.filter((item) => item.score === 'x2');
+    if (x2result.length <= 0) {
+      setBoosterScore2x(false)
+    }
+
+    const speedupResult = boosterIcons.filter(item => item.score === 'speedup')
+    if (speedupResult.length <= 0) {
+      setSpeed(speed + 1);
+    }
+    
+    const slowResult = boosterIcons.filter(item => item.score === 'slow')
+    if (slowResult.length <= 0) {
+      setSpeed(speed + 1);
+    }
+
+    const shieldResult = boosterIcons.filter(item => item.score === 'shield')
+    if (shieldResult.length <= 0) {
+      setBoosterShield(false);
+    }
+  }, [time]);
+
+  useEffect(() => {
+    setTimeout(() => {
+      setTime((pre) => pre + 1)
+    }, 2000);
+
     const choose = Math.random();
     const id = Date.now().toString();
     const coins = coin();
     const boosterCoins = booster();
-
     const item = choose < 0.2 ?
       <div className='w-[40px] h-[40px]'>
         <img src={boosterCoins.item} alt="boost itme" className='w-full h-full object-cover' />
@@ -200,33 +207,9 @@ const Play = () => {
         <img src={coins.item} alt="item" className="w-full h-full object-cover w-[40px] h-[40px]" />
       </div>;
     const location = Math.floor(Math.random() * 4);
-
     setShowingItems((prevItems) => [...prevItems, { id, item, top: location % 2 ? 10 : 160, wid: 0, pos: location < 2 ? 0 : 1, location: location, score: choose < 0.2 ? boosterCoins.score : coins.score, url: choose < 0.2 ? boosterCoins.item : coins.item }]);
-  };
-
-  useEffect(() => {
-    if (timer) clearInterval(timer); // Clear previous interval before setting a new one
-    const newTimer = setInterval(() => {
-
-      setSpeed(speed + 1);
-    }, speed);
-
-    setTimer(newTimer);
-
-    return () => {
-      clearInterval(newTimer); // Cleanup on unmount
-    }
-  }, [speed]); // Depend only on `speed` to re-run properly
-  // Move items down every 100ms
-
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      createItem();
-    }, 1400);
-
-    return () => clearInterval(interval)
-  }, [])
+    setSpeed(speed + 1);
+  }, [time]);
 
   // useEffect(() => {
   //   const dieResult = health.every((item) => item === 0);
@@ -236,12 +219,11 @@ const Play = () => {
   // }, [health]);
 
   useEffect(() => {
-
     const interval = setInterval(() => {
       let flage = true;
       setShowingItems((prevItems) =>
         prevItems
-          .map(({ id, item, top, wid, pos, location, score, url }) => ({ id, item, top: top + 0.06, wid: wid + 0.1, pos, location, score, url })) // Move items down
+          .map(({ id, item, top, wid, pos, location, score, url }) => ({ id, item, top: top + 0.7, wid: wid + 1, pos, location, score, url })) // Move items down
           .filter(({ wid, score }) => {
             if (wid < 95) return wid;
             if (wid > 90) {
@@ -257,7 +239,7 @@ const Play = () => {
             }
           }) // Remove if off-screen
       );
-    }, 1);
+    }, 100);
 
     return () => clearInterval(interval);
   }, []);
@@ -310,8 +292,8 @@ const Play = () => {
               {currentScore}/<span className="text-[#767676]">{fianllyScore}</span>
             </h5>
             <div className="flex justify-center w-full h-[30px] gap-1">
-              {boosterIcons.map((icon, index) => (
-                <Image key={index} className="bg-white w-[30px] h-[30px] rounded-full" src={icon} alt={icon} />
+              {boosterIcons.map((item) => (
+                <Image key={item.wid} className="bg-white w-[30px] h-[30px] rounded-full" src={item.url} alt="booster Items" />
               ))}
             </div>
           </div>
