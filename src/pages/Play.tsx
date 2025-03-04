@@ -11,7 +11,6 @@ import {
 } from "@/assets/icons";
 import { FootPrint, Boxlion_left, Boxlion_right } from "@/assets/imgs";
 
-import Booster from "@/components/items/Booster";
 import coin from "@/components/items/Coin";
 import booster from "@/components/items/Booster";
 
@@ -20,15 +19,16 @@ import booster from "@/components/items/Booster";
 
 const Play = () => {
   const fianllyScore = 1000;
-  const [currentScore, setCurrentScore] = useState(10);
+
+  const [currentScore, setCurrentScore] = useState(0);
   const [speed, setSpeed] = useState(1000);
   const [timer, setTimer] = useState<NodeJS.Timeout | null>(null);
-  const [showingItems, setShowingItems] = useState<{ id: string, item: React.ReactNode, wid: number, top: number, pos: number, location: number, score: any }[]>([]);
-  const [health, setHealth] = useState([1, 1, 0, 0]);
-  const [num, setNum] = useState(4);
-  const [showModal, setShowModal] = useState({ win: false, lose: false });
-  const [pos, setPos] = useState({ direction: Boxlion_left });
 
+  const [showingItems, setShowingItems] = useState<{ id: string, item: React.ReactNode, wid: number, top: number, pos: number, location: number, score: any }[]>([]);
+  const [health, setHealth] = useState([1, 1, 1, 1]);
+  const [showModal, setShowModal] = useState({ win: false, lose: false });
+
+  const [pos, setPos] = useState({ direction: Boxlion_left });
   const [boosterScore2x, setBoosterScore2x] = useState(false);
   const [boosterShield, setBoosterShield] = useState(false);
 
@@ -37,10 +37,10 @@ const Play = () => {
   const avatarUrl = currentUser?.photo_url || "https://i.postimg.cc/YSm0rKS7/User-35.png";
 
   const winOrFailModal = (str: string) => {
-    if (str == 'win') {
+    if (str === 'win') {
       setShowModal({ win: true, lose: false });
       return
-    } else if (str == 'lose') {
+    } else if (str === 'lose') {
       setShowModal({ win: false, lose: true });
       return
     }
@@ -53,31 +53,38 @@ const Play = () => {
     // -1 : 1 = 3
     // -1 : -1 = 2
     showingItems.filter((item) => {
-      if ((count === 1 && position === 1) && item.location === 1 ||
-        (count === 1 && position === -1) && item.location === 0 ||
-        (count === -1 && position === 1) && item.location === 3 ||
-        (count === -1 && position === -1) && item.location === 2
+      if (((count === 1 && position === 1) && item.location === 1) ||
+        ((count === 1 && position === -1) && item.location === 0) ||
+        ((count === -1 && position === 1) && item.location === 3) ||
+        ((count === -1 && position === -1) && item.location === 2)
       ) {
 
-        if (item.wid > 70 && item.wid < 90) { // coin
-          if (typeof item.score == `number`) {
+        if (item.wid > 70 && item.wid < 90) {
+
+          if (typeof item.score == `number`) {   // coin
+
+            if (currentScore + item.score >= fianllyScore) {
+              winOrFailModal('win');
+              setCurrentScore(preScore => boosterScore2x ? preScore + item.score * 2 : preScore + item.score); // add the coin's score
+              return;
+            }
+
             setCurrentScore(preScore => boosterScore2x ? preScore + item.score * 2 : preScore + item.score); // add the coin's score
             setShowingItems((prevItems) =>
               prevItems.filter(it => it !== item) // Remove this coin
             );
-            if (currentScore >= fianllyScore) {
-              winOrFailModal('win');
-            }
           }
-          else { // booster coin
-            if (item.score == 'x2') {
+
+          else {                            // booster coin
+            if (item.score === 'x2') {
               console.log('x2 =====> 🚀', `x2`);
               setBoosterScore2x(true);
               setTimeout(() => {
                 setBoosterScore2x(false);
               }, 10000)
             }
-            else if (item.score == 'bomb') {
+
+            else if (item.score === 'bomb') {
               console.log('bomb =====> 🚀', `bomb`);
               if (!boosterShield) {
                 setHealth(preHealth => preHealth.map((item) => 0))
@@ -85,25 +92,29 @@ const Play = () => {
                 return;
               }
             }
-            else if (item.score == 'speedup') {
+
+            else if (item.score === 'speedup') {
               console.log('speedup =====> 🚀', `speedup`);
-              setSpeed(speed + 1 + 5);
+              setSpeed(speed + 1 + 10);
               setTimeout(() => {
                 setSpeed(speed + 1);
               }, 10000)
             }
-            else if (item.score == 'slow') {
+
+            else if (item.score === 'slow') {
               console.log('slow =====> 🚀', `slow`);
-              setSpeed(speed + 1 - 5);
+              setSpeed(speed + 1 - 10);
               setTimeout(() => {
                 setSpeed(speed + 1);
               }, 10000)
             }
-            else if (item.score == 'fullhealth') {
+
+            else if (item.score === 'fullhealth') {
               console.log('fullhealth =====> 🚀', `fullhealth`);
               setHealth(preHealth => preHealth.map((it) => 1))
             }
-            else if (item.score == 'health') {
+
+            else if (item.score === 'health') {
               setHealth((preHealth) => {
                 let boosterHealth = true;
 
@@ -116,15 +127,17 @@ const Play = () => {
                 }
                 )
                 return newHealth
-              })  
+              })
             }
-            else if (item.score == 'shield') {
-              console.log('shield =====> 🚀',`shield`);
+
+            else if (item.score === 'shield') {
+              console.log('shield =====> 🚀', `shield`);
               setBoosterShield(true);
               setTimeout(() => {
                 setBoosterShield(false);
               }, 10000)
             }
+
             setShowingItems((prevItems) =>
               prevItems.filter(it => it !== item) // Remove this booster coin
             );
@@ -172,16 +185,35 @@ const Play = () => {
       clearInterval(newTimer); // Cleanup on unmount
     }
   }, [speed]); // Depend only on `speed` to re-run properly
-
   // Move items down every 100ms
   useEffect(() => {
+    const dieResult = health.every((item) => item === 0);
+    if (dieResult) {
+      winOrFailModal('lose');
+    }
+  }, [health]);
 
+  useEffect(() => {
 
     const interval = setInterval(() => {
+      let flage = true;
       setShowingItems((prevItems) =>
         prevItems
           .map(({ id, item, top, wid, pos, location, score }) => ({ id, item, top: top + 3, wid: wid + 5, pos, location, score })) // Move items down
-          .filter(({ wid }) => wid < 90) // Remove if off-screen
+          .filter(({ wid, score }) => {
+            if (wid < 95) return wid;
+            if (wid > 90) {
+              if (typeof score == 'number' && flage === true) {
+                setHealth((preHealth) => {
+                  let newD = [...preHealth];
+                  newD.shift()
+                  newD.push(0);
+                  return newD
+                });
+                flage = false
+              }
+            }
+          }) // Remove if off-screen
       );
     }, 250);
 
