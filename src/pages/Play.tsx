@@ -28,6 +28,7 @@ const Play = () => {
   const [boosterIcons, setBoosterIcons] = useState<BoosterIcon[]>([]);
   const [currentScore, setCurrentScore] = useState(0);
   const [speed, setSpeed] = useState(1000);
+  const [previousLocation, setPreviousLocation] = useState(1000);
 
   const [showingItems, setShowingItems] = useState<{ id: string, item: React.ReactNode, wid: number, top: number, pos: number, location: number, score: any, url: any }[]>([]);
   const [health, setHealth] = useState([1, 1, 1, 1]);
@@ -49,7 +50,8 @@ const Play = () => {
       setShowModal({ win: false, lose: true });
       return
     }
-  };
+  };  
+
 
   const changePos = (direction: string, count: number, position: number) => {
     // 1 : 1 = 1
@@ -67,6 +69,7 @@ const Play = () => {
           setShowingItems((prevItems) =>
             prevItems.filter(it => it !== item) // Remove this coin
           );
+
           if (typeof item.score == `number`) {   // coin
             if (currentScore + item.score >= fianllyScore) {
               winOrFailModal('win');
@@ -177,7 +180,7 @@ const Play = () => {
     if (speedupResult.length <= 0) {
       setSpeed(speed + 1);
     }
-    
+
     const slowResult = boosterIcons.filter(item => item.score === 'slow')
     if (slowResult.length <= 0) {
       setSpeed(speed + 1);
@@ -206,9 +209,13 @@ const Play = () => {
       <div className="w-[40px] h-[40px]">
         <img src={coins.item} alt="item" className="w-full h-full object-cover w-[40px] h-[40px]" />
       </div>;
+
     const location = Math.floor(Math.random() * 4);
-    setShowingItems((prevItems) => [...prevItems, { id, item, top: location % 2 ? 10 : 160, wid: 0, pos: location < 2 ? 0 : 1, location: location, score: choose < 0.2 ? boosterCoins.score : coins.score, url: choose < 0.2 ? boosterCoins.item : coins.item }]);
-    setSpeed(speed + 1);
+    if (previousLocation !== location) {
+      setShowingItems((prevItems) => [...prevItems, { id, item, top: location % 2 ? 10 : 160, wid: 0, pos: location < 2 ? 0 : 1, location: location, score: choose < 0.2 ? boosterCoins.score : coins.score, url: choose < 0.2 ? boosterCoins.item : coins.item }]);
+      setSpeed(speed + 1);
+    }
+    setPreviousLocation(location)
   }, [time]);
 
   // useEffect(() => {
