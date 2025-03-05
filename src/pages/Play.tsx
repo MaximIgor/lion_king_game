@@ -27,7 +27,7 @@ const Play = () => {
   const [time, setTime] = useState(0);
   const [boosterIcons, setBoosterIcons] = useState<BoosterIcon[]>([]);
   const [currentScore, setCurrentScore] = useState(0);
-  const [speed, setSpeed] = useState(1000);
+  const [speed, setSpeed] = useState(3000);
   const [previousLocation, setPreviousLocation] = useState(1000);
 
   const [showingItems, setShowingItems] = useState<{ id: string, item: React.ReactNode, wid: number, top: number, pos: number, location: number, score: any, url: any }[]>([]);
@@ -101,7 +101,7 @@ const Play = () => {
 
             if (item.score === 'speedup') {
               console.log('speedup =====> 🚀', `speedup`);
-              setSpeed(speed + 1 + 10);
+              setSpeed(speed - 1 -1000);
               setTimeout(() => {
                 let width = item.wid;
                 setBoosterIcons(prevItem => [...prevItem].filter(it => it.url !== item.url || it.wid !== width))
@@ -110,7 +110,7 @@ const Play = () => {
 
             if (item.score === 'slow') {
               console.log('slow =====> 🚀', `slow`);
-              setSpeed(speed + 1 - 10);
+              setSpeed(speed - 1 + 1000);
               setTimeout(() => {
                 let width = item.wid;
                 setBoosterIcons(prevItem => [...prevItem].filter(it => it.url !== item.url || it.wid !== width))
@@ -195,7 +195,7 @@ const Play = () => {
   useEffect(() => {
     setTimeout(() => {
       setTime((pre) => pre + 1)
-    }, 2000);
+    }, speed);
 
     const choose = Math.random();
     const id = Date.now().toString();
@@ -218,12 +218,12 @@ const Play = () => {
     setPreviousLocation(location)
   }, [time]);
 
-  // useEffect(() => {
-  //   const dieResult = health.every((item) => item === 0);
-  //   if (dieResult) {
-  //     winOrFailModal('lose');
-  //   }
-  // }, [health]);
+  useEffect(() => {
+    const dieResult = health.every((item) => item === 0);
+    if (dieResult) {
+      winOrFailModal('lose');
+    }
+  }, [health]);
 
   useEffect(() => {
     const interval = setInterval(() => {
