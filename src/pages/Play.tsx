@@ -341,12 +341,12 @@ const Play = () => {
     ///////////////////////
 
 
-    // useEffect(() => {
-    //     const dieResult = health.every((item) => item === 0);
-    //     if (dieResult) {
-    //         winOrFailModal('lose');
-    //     }
-    // }, [health]);
+    useEffect(() => {
+        const dieResult = health.every((item) => item === 0);
+        if (dieResult) {
+            winOrFailModal('lose');
+        }
+    }, [health]);
 
     ///////////////////////
     //                   //
