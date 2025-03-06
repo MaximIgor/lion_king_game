@@ -271,6 +271,14 @@ const Play = () => {
         setPreviousLocation(location);
     }, [time]);
 
+    ///////////////////////
+    //                   //
+    //    LOSE  !!       //
+    //    CONDITION      //
+    //                   //
+    ///////////////////////
+
+
     useEffect(() => {
         const dieResult = health.every((item) => item === 0);
         if (dieResult) {
