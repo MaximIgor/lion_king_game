@@ -85,6 +85,13 @@ const Play = () => {
     const displayName = currentUser?.username || currentUser?.first_name || 'Guest';
     const avatarUrl = currentUser?.photo_url || "https://i.postimg.cc/YSm0rKS7/User-35.png";
 
+    ///////////////////////
+    //                   //
+    //    WIN OR LOSE    //
+    //    STOP GAME      //
+    //                   //
+    ///////////////////////
+
     const stopGame = () => {
         setIsGameRunning(false);
         setShowingItems([]);
@@ -174,8 +181,8 @@ const Play = () => {
                         }
 
                         if (item.score === 'speedup') {
-                            console.log('speedup =====> 🚀', `speedup`);
                             const speedupResult = boosterIcons.filter(item => item.score === 'speedup')
+                            console.log('speedup =====> 🚀', speedupResult.length);
                             if (speedupResult.length > 0) return
                             setSpeed(speed => speed / 2);
                             setTimeout(() => {
@@ -185,8 +192,8 @@ const Play = () => {
                         }
 
                         if (item.score === 'slow') {
-                            console.log('slow =====> 🚀', `slow`);
                             const slowResult = boosterIcons.filter(item => item.score === 'slow')
+                            console.log('slow =====> 🚀', slowResult.length);
                             if (slowResult.length > 0) return
                             setSpeed(speed => speed * 2);
                             setTimeout(() => {

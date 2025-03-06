@@ -5,7 +5,7 @@ import Dog from '@/assets/icons/items/dog.png' // 15%          score  3
 
 const items = [Cat, Dog, BigCoin, SmallCoin]
 const appearanceRates = [15, 15, 5, 65];
-const itemScore = [3, 3, 10, 1];
+const itemScore = [1, 1, 1, 1];
 
 
 const coin = () => {
