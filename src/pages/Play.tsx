@@ -35,10 +35,10 @@ const Play = () => {
     const booster = () => {
         let type = 0;
         const random_num = Math.random();
-        if (random_num < bombChance) type = 0; // 5% for bumb
+        if (random_num < bombChance) type = 0; // 4% for bumb
+        else if (random_num < 0.10) type = 3; // 6% for health
         else if (random_num < 0.25) type = 1; // 15% for speedup
         else if (random_num < 0.40) type = 2; // 15% for fullhealth
-        else if (random_num < 0.10) type = 3; // 6% for health
         else if (random_num < 0.55) type = 4; // 15% for shield
         else if (random_num < 0.70) type = 5; // 15% for slow
         else type = 6; // 15% for x2
@@ -75,11 +75,25 @@ const Play = () => {
     const [boosterScore2x, setBoosterScore2x] = useState(false);
 
     const [boosterShield, setBoosterShield] = useState(false);
-    const [boosterEffect, setBoosterEffect] = useState(false);
+    const [boosterEffectx2, setBoosterEffectx2] = useState(false);
+    const [boosterEffectup, setBoosterEffectup] = useState(false);
+    const [boosterEffectSlow, setBoosterEffectSlow] = useState(false);
+    const [boosterEffectShield, setBoosterEffectShield] = useState(false);
+    const [isGameRunning, setIsGameRunning] = useState(true);
 
     const currentUser = useContext<TelegramUser | null>(TelegramContext);
     const displayName = currentUser?.username || currentUser?.first_name || 'Guest';
     const avatarUrl = currentUser?.photo_url || "https://i.postimg.cc/YSm0rKS7/User-35.png";
+
+    const stopGame = () => {
+        setIsGameRunning(false);
+        setShowingItems([]);
+        setBoosterIcons([]);
+        setSpeed(1500);
+        setCoinCounter(0);
+        setBombChance(0.05);
+        setBoosterChance(0.3);
+    };
 
     ///////////////////////
     //                   //
@@ -91,9 +105,11 @@ const Play = () => {
     const winOrFailModal = (str: string) => {
         if (str === 'win') {
             setShowModal({ win: true, lose: false });
+            stopGame()
             return
         } else if (str === 'lose') {
             setShowModal({ win: false, lose: true });
+            stopGame()
             return
         }
     };
@@ -146,7 +162,7 @@ const Play = () => {
                                 setBoosterIcons(prevItem => {
                                     return [...prevItem].filter(it => it.url !== item.url || it.wid !== width);
                                 });
-                            }, 10000);
+                            }, 60000);
                         }
 
                         if (item.score === 'bomb') {
@@ -159,20 +175,24 @@ const Play = () => {
 
                         if (item.score === 'speedup') {
                             console.log('speedup =====> 🚀', `speedup`);
+                            const speedupResult = boosterIcons.filter(item => item.score === 'speedup')
+                            if (speedupResult.length > 0) return
                             setSpeed(speed => speed / 2);
                             setTimeout(() => {
                                 let width = item.wid;
                                 setBoosterIcons(prevItem => [...prevItem].filter(it => it.url !== item.url || it.wid !== width));
-                            }, 10000)
+                            }, 60000)
                         }
 
                         if (item.score === 'slow') {
                             console.log('slow =====> 🚀', `slow`);
+                            const slowResult = boosterIcons.filter(item => item.score === 'slow')
+                            if (slowResult.length > 0) return
                             setSpeed(speed => speed * 2);
                             setTimeout(() => {
                                 let width = item.wid;
                                 setBoosterIcons(prevItem => [...prevItem].filter(it => it.url !== item.url || it.wid !== width))
-                            }, 10000)
+                            }, 60000)
                         }
 
                         if (item.score === 'fullhealth') {
@@ -200,7 +220,7 @@ const Play = () => {
                             setTimeout(() => {
                                 let width = item.wid;
                                 setBoosterIcons(prevItem => [...prevItem].filter(it => it.url !== item.url || it.wid !== width))
-                            }, 10000)
+                            }, 60000)
                         }
 
                         if (item.score !== 'fullhealth' && item.score !== 'health' && item.score !== `bomb`) {
@@ -233,55 +253,56 @@ const Play = () => {
     ///////////////////////
 
     useEffect(() => {
+        if (!isGameRunning) return;
 
         const x2result = boosterIcons.filter((item) => item.score === 'x2');
         if (x2result.length > 0) {
-            setBoosterEffect(true);
+            setBoosterEffectx2(true);
         }
         else {
-            if (boosterEffect) {
+            if (boosterEffectx2) {
                 if (x2result.length <= 0) {
                     setBoosterScore2x(false)
-                    setBoosterEffect(false)
+                    setBoosterEffectx2(false)
                 }
             }
         }
 
         const speedupResult = boosterIcons.filter(item => item.score === 'speedup')
         if (speedupResult.length > 0) {
-            setBoosterEffect(true);
+            setBoosterEffectup(true);
         }
         else {
-            if (boosterEffect) {
+            if (boosterEffectup) {
                 if (speedupResult.length <= 0) {
                     setSpeed(speed * 2)
-                    setBoosterEffect(false)
+                    setBoosterEffectup(false)
                 }
             }
         }
 
         const slowResult = boosterIcons.filter(item => item.score === 'slow')
         if (slowResult.length > 0) {
-            setBoosterEffect(true);
+            setBoosterEffectSlow(true);
         }
         else {
-            if (boosterEffect) {
+            if (boosterEffectSlow) {
                 if (slowResult.length <= 0) {
                     setSpeed(speed / 2)
-                    setBoosterEffect(false)
+                    setBoosterEffectSlow(false)
                 }
             }
         }
 
         const shieldResult = boosterIcons.filter(item => item.score === 'shield')
         if (shieldResult.length > 0) {
-            setBoosterEffect(true);
+            setBoosterEffectShield(true);
         }
         else {
-            if (boosterEffect) {
+            if (boosterEffectShield) {
                 if (shieldResult.length <= 0) {
                     setBoosterShield(false)
-                    setBoosterEffect(false)
+                    setBoosterEffectShield(false)
                 }
             }
         }
@@ -297,6 +318,8 @@ const Play = () => {
     //////////////////////////
 
     useEffect(() => {
+        if (!isGameRunning) return;
+
         setTimeout(() => {
             setTime((pre) => pre + 1)
         }, speed);
