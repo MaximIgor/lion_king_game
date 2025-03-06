@@ -64,7 +64,7 @@ const Play = () => {
     const [speed, setSpeed] = useState(1500);
     const [previousLocation, setPreviousLocation] = useState(1000);
 
-    const [boosterChance, setBoosterChance] = useState(0.1);
+    const [boosterChance, setBoosterChance] = useState(0.3);
     const [coinCounter, setCoinCounter] = useState(0);
 
     const [showingItems, setShowingItems] = useState<{ id: string, item: React.ReactNode, wid: number, top: number, pos: number, location: number, score: any, url: any }[]>([]);
@@ -73,13 +73,20 @@ const Play = () => {
 
     const [pos, setPos] = useState({ direction: Boxlion_left });
     const [boosterScore2x, setBoosterScore2x] = useState(false);
+
     const [boosterShield, setBoosterShield] = useState(false);
+    const [boosterEffect, setBoosterEffect] = useState(false);
 
     const currentUser = useContext<TelegramUser | null>(TelegramContext);
     const displayName = currentUser?.username || currentUser?.first_name || 'Guest';
     const avatarUrl = currentUser?.photo_url || "https://i.postimg.cc/YSm0rKS7/User-35.png";
 
-
+    ///////////////////////
+    //                   //
+    //    WIN OR LOSE    //
+    //    POPUP          //
+    //                   //
+    ///////////////////////
 
     const winOrFailModal = (str: string) => {
         if (str === 'win') {
@@ -90,6 +97,14 @@ const Play = () => {
             return
         }
     };
+
+
+    ///////////////////////
+    //                   //
+    //    BUTTON         //
+    //    CLICK EVENT    //
+    //                   //
+    ///////////////////////
 
     const changePos = (direction: string, count: number, position: number, fakeWid: number = 0) => {
         setAutoReceiveImage(direction);
@@ -111,8 +126,6 @@ const Play = () => {
                     setShowingItems((prevItems) =>
                         prevItems.filter(it => it !== item) // Remove this coin
                     );
-
-                    console.log(`🎗🎗🎗${item.score}`)
 
                     if (typeof item.score == `number`) {   // coin
                         if (currentScore + item.score >= fianllyScore) {
@@ -146,16 +159,16 @@ const Play = () => {
 
                         if (item.score === 'speedup') {
                             console.log('speedup =====> 🚀', `speedup`);
-                            setSpeed(speed * 2);
+                            setSpeed(speed => speed / 2);
                             setTimeout(() => {
                                 let width = item.wid;
-                                setBoosterIcons(prevItem => [...prevItem].filter(it => it.url !== item.url || it.wid !== width))
+                                setBoosterIcons(prevItem => [...prevItem].filter(it => it.url !== item.url || it.wid !== width));
                             }, 10000)
                         }
 
                         if (item.score === 'slow') {
                             console.log('slow =====> 🚀', `slow`);
-                            setSpeed(speed / 2);
+                            setSpeed(speed => speed * 2);
                             setTimeout(() => {
                                 let width = item.wid;
                                 setBoosterIcons(prevItem => [...prevItem].filter(it => it.url !== item.url || it.wid !== width))
@@ -210,31 +223,78 @@ const Play = () => {
             }
         })
 
-        // setSpeed(prevSpeed => prevSpeed + 1);
     };
 
+    ///////////////////////
+    //                   //
+    //    BOOSTER        //
+    //    EFFECT         //
+    //                   //
+    ///////////////////////
 
     useEffect(() => {
+
         const x2result = boosterIcons.filter((item) => item.score === 'x2');
-        if (x2result.length <= 0) {
-            setBoosterScore2x(false)
+        if (x2result.length > 0) {
+            setBoosterEffect(true);
+        }
+        else {
+            if (boosterEffect) {
+                if (x2result.length <= 0) {
+                    setBoosterScore2x(false)
+                    setBoosterEffect(false)
+                }
+            }
         }
 
         const speedupResult = boosterIcons.filter(item => item.score === 'speedup')
-        if (speedupResult.length <= 0) {
-            setSpeed(speed);
+        if (speedupResult.length > 0) {
+            setBoosterEffect(true);
+        }
+        else {
+            if (boosterEffect) {
+                if (speedupResult.length <= 0) {
+                    setSpeed(speed * 2)
+                    setBoosterEffect(false)
+                }
+            }
         }
 
         const slowResult = boosterIcons.filter(item => item.score === 'slow')
-        if (slowResult.length <= 0) {
-            setSpeed(speed);
+        if (slowResult.length > 0) {
+            setBoosterEffect(true);
+        }
+        else {
+            if (boosterEffect) {
+                if (slowResult.length <= 0) {
+                    setSpeed(speed / 2)
+                    setBoosterEffect(false)
+                }
+            }
         }
 
         const shieldResult = boosterIcons.filter(item => item.score === 'shield')
-        if (shieldResult.length <= 0) {
-            setBoosterShield(false);
+        if (shieldResult.length > 0) {
+            setBoosterEffect(true);
         }
+        else {
+            if (boosterEffect) {
+                if (shieldResult.length <= 0) {
+                    setBoosterShield(false)
+                    setBoosterEffect(false)
+                }
+            }
+        }
+
     }, [time]);
+
+
+    /////////////////////////
+    //                   //
+    //     COIN          //
+    //    GENERATE       //
+    //                   //
+    //////////////////////////
 
     useEffect(() => {
         setTimeout(() => {
@@ -248,6 +308,8 @@ const Play = () => {
         const boosterCoins = booster();
 
         setCoinCounter(coinCounter + 1);
+
+        console.log(`speed >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> ${speed}`)
 
         if (coinCounter !== 0 && coinCounter % 10 === 0) {
             if (bombChance < 0.3) setBombChance(bombChance + 0.02);
@@ -279,12 +341,19 @@ const Play = () => {
     ///////////////////////
 
 
-    useEffect(() => {
-        const dieResult = health.every((item) => item === 0);
-        if (dieResult) {
-            winOrFailModal('lose');
-        }
-    }, [health]);
+    // useEffect(() => {
+    //     const dieResult = health.every((item) => item === 0);
+    //     if (dieResult) {
+    //         winOrFailModal('lose');
+    //     }
+    // }, [health]);
+
+    ///////////////////////
+    //                   //
+    //    COIN           //
+    //    KILL OR AUTO   //
+    //                   //
+    ///////////////////////
 
     useEffect(() => {
         const interval = setInterval(() => {
