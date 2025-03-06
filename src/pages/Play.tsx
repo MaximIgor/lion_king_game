@@ -34,9 +34,8 @@ const Play = () => {
 
     const booster = () => {
         let type = 0;
-
         const random_num = Math.random();
-        if (random_num < bombChance) type = 0; // 4% for bumb
+        if (random_num < bombChance) type = 0; // 5% for bumb
         else if (random_num < 0.25) type = 1; // 15% for speedup
         else if (random_num < 0.40) type = 2; // 15% for fullhealth
         else if (random_num < 0.10) type = 3; // 6% for health
@@ -108,7 +107,7 @@ const Play = () => {
                 ((count === -1 && position === 1) && item.location === 3) ||
                 ((count === -1 && position === -1) && item.location === 2)
             ) {
-                if ((item.wid === 108) || fakeWid === 108) {
+                if ((item.wid === 108 || item.wid === 81) || fakeWid === 108) {
                     setShowingItems((prevItems) =>
                         prevItems.filter(it => it !== item) // Remove this coin
                     );
@@ -243,15 +242,12 @@ const Play = () => {
         }, speed);
 
         const choose = Math.random();
+
         const id = Date.now().toString();
         const coins = coin();
         const boosterCoins = booster();
 
         setCoinCounter(coinCounter + 1);
-        console.log(`coinCounter ----------- ${coinCounter}`);
-        console.log(`speed ----------- ${speed}`);
-        console.log(`boosterChance ----------- ${boosterChance}`);
-        console.log(`bombChance ----------- ${bombChance}`);
 
         if (coinCounter !== 0 && coinCounter % 10 === 0) {
             if (bombChance < 0.3) setBombChance(bombChance + 0.02);
@@ -275,12 +271,12 @@ const Play = () => {
         setPreviousLocation(location);
     }, [time]);
 
-    // useEffect(() => {
-    //     const dieResult = health.every((item) => item === 0);
-    //     if (dieResult) {
-    //         winOrFailModal('lose');
-    //     }
-    // }, [health]);
+    useEffect(() => {
+        const dieResult = health.every((item) => item === 0);
+        if (dieResult) {
+            winOrFailModal('lose');
+        }
+    }, [health]);
 
     useEffect(() => {
         const interval = setInterval(() => {
