@@ -12,7 +12,7 @@ import {
 } from "@/assets/icons";
 
 import { FootPrint, Boxlion_left, Boxlion_right } from "@/assets/imgs";
-import coin from "@/components/items/Coin";
+// import coin from "@/components/items/Coin";
 // import booster from "@/components/items/Booster";
 
 import bumb from '@/assets/icons/items/bumb.png' // 4%
@@ -23,25 +23,59 @@ import shield from '@/assets/icons/items/shield.png' // 15%
 import slow from '@/assets/icons/items/slow.png' // 15%
 import x2 from '@/assets/icons/items/x2.png' // 15%
 
+import BigCoin from '@/assets/icons/items/bcoin.png' // 5%     score  10
+import SmallCoin from '@/assets/icons/items/scoin.png' // 65%  score  1
+import Cat from '@/assets/icons/items/cat.png' // 15%          score  3
+import Dog from '@/assets/icons/items/dog.png' // 15%          score  3
+
+
+
+
 
 
 const Play = () => {
     const fianllyScore = 1000;
+    // let catchCoinCounter = 0;
+    const [catchCoinCounter, setCatchCoinCounter] = useState(0)
 
-    const items = [bumb, speedup, fullhealth, healthIcon, shield, slow, x2];
-    const itemScore = [`bomb`, `speedup`, `fullhealth`, `health`, `shield`, `slow`, `x2`];
-    const [bombChance, setBombChance] = useState(0.05)
+    const items = [speedup, fullhealth, healthIcon, shield, slow, x2];
+    const itemScore = [`speedup`, `fullhealth`, `health`, `shield`, `slow`, `x2`];
+    const [bombChance, setBombChance] = useState(0.05);
 
     const booster = () => {
         let type = 0;
         const random_num = Math.random();
-        if (random_num < bombChance) type = 0; // 4% for bumb
-        else if (random_num < 0.10) type = 3; // 6% for health
-        else if (random_num < 0.25) type = 1; // 15% for speedup
-        else if (random_num < 0.40) type = 2; // 15% for fullhealth
-        else if (random_num < 0.55) type = 4; // 15% for shield
-        else if (random_num < 0.70) type = 5; // 15% for slow
-        else type = 6; // 15% for x2
+        // if (random_num < bombChance) type = 0; // 4% for bumb
+        if (random_num < 0.10) type = 2; // 6% for health
+        else if (random_num < 0.25) type = 0; // 15% for speedup
+        else if (random_num < 0.40) type = 1; // 15% for fullhealth
+        else if (random_num < 0.55) type = 3; // 15% for shield
+        else if (random_num < 0.70) type = 4; // 15% for slow
+        else type = 5; // 15% for x2
+
+        return { item: items[type], score: itemScore[type] }
+    };
+
+    const bombCoin = () => {
+        return { item: bumb, score: `bomb` }
+    }
+
+    const coin = () => {
+
+        const items = [Cat, Dog, BigCoin, SmallCoin]
+        const appearanceRates = [15, 15, 5, 65];
+        const itemScore = [coinScore, coinScore, coinScore, coinScore];
+        let type = 0;
+
+        const random = Math.random() * 100
+        let cumulativeRate = 0
+        for (let i = 0; i < appearanceRates.length; i++) {
+            cumulativeRate += appearanceRates[i]
+            if (random < cumulativeRate) {
+                type = i;
+                break
+            }
+        }
 
         return { item: items[type], score: itemScore[type] }
     };
@@ -61,13 +95,14 @@ const Play = () => {
     const [autoReceivePosition, setAutoReceivePosition] = useState<number>(1);
 
     // const [generateMulti, setGenerateMulti] = useState(0);
-    let generateMulti = 0
+    let generateMulti = 0;
     const [generateSpeed, setGenerateSpeed] = useState(6000);
     const [speed, setSpeed] = useState(1500);
     const [previousLocation, setPreviousLocation] = useState(1000);
 
     const [boosterChance, setBoosterChance] = useState(0.1);
     const [coinCounter, setCoinCounter] = useState(0);
+    const [coinScore, setCoinScore] = useState(1);
 
     const [showingItems, setShowingItems] = useState<{ id: string, item: React.ReactNode, wid: number, top: number, pos: number, location: number, score: any, url: any }[]>([]);
     const [health, setHealth] = useState([1, 1, 1, 1]);
@@ -124,6 +159,19 @@ const Play = () => {
         }
     };
 
+    ///////////////////////
+    //                   //
+    //    100 coin  +1   //
+    //    200 coin  +1   //
+    //         ...       //
+    ///////////////////////
+
+    useEffect(() => {
+        if (catchCoinCounter !== 0 && catchCoinCounter % 100 === 0) {
+            setCoinScore(coinScore + 1);
+        }
+        setCatchCoinCounter(catchCoinCounter + 1);
+    }, [currentScore])
 
     ///////////////////////
     //                   //
@@ -137,6 +185,8 @@ const Play = () => {
         setAutoReceiveCount(count);
         setAutoReceivePosition(position);
 
+
+
         // 1 : 1 = 1
         // 1 : -1 = 0
         // -1 : 1 = 3
@@ -149,10 +199,11 @@ const Play = () => {
                 ((count === -1 && position === -1) && item.location === 2)
             ) {
                 if ((item.wid === 108 || item.wid === 81) || fakeWid === 108) {
-                    setShowingItems((prevItems) =>
-                        prevItems.filter(it => it !== item) // Remove this coin
-                    );
-
+                    // setShowingItems((prevItems) =>
+                    //     prevItems.filter(it => it !== item) // Remove this coin
+                    // );
+                    console.log(`++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ ${item.score}`);
+                    
                     if (typeof item.score == `number`) {   // coin
                         if (currentScore + item.score >= fianllyScore) {
                             winOrFailModal('win');
@@ -162,7 +213,7 @@ const Play = () => {
                             setCurrentScore(preScore => boosterScore2x ? preScore + item.score * 2 : preScore + item.score); // add the coin's score
                         }
                     }
-                    else {                            // booster coin
+                    else {
                         if (item.score === 'x2') {
                             console.log('x2 =====> 🚀', `x2`);
                             if (currentScore < 300)
@@ -176,7 +227,7 @@ const Play = () => {
                         }
 
                         if (item.score === 'bomb') {
-                            console.log('bomb =====> 🚀', `bomb`);
+                            console.log('bomb =====> 🚀', `bomb`, boosterShield);
                             if (!boosterShield) {
                                 setHealth(preHealth => preHealth.map((item) => 0))
                                 winOrFailModal('lose');
@@ -247,7 +298,6 @@ const Play = () => {
                             })
                         }
                     }
-
                     setShowingItems(prevItem => prevItem.filter(it => it !== item))
                 }
             }
@@ -326,6 +376,10 @@ const Play = () => {
     //                     //
     /////////////////////////
 
+
+    const [item, setItem] = useState<React.ReactNode>()
+    const [score, setScore] = useState<number | string>(0)
+    const [url, setUrl] = useState<string>()
     const generateCoins = () => {
         if (generateMulti === generateSpeed) return;
         generateMulti = generateSpeed;
@@ -335,36 +389,53 @@ const Play = () => {
             setGenerateSpeed(prev => prev - 5);
         }, generateSpeed);
 
-        console.log(`generateSpeed -------------------------------- >    ${generateSpeed}`);
-        console.log(`speed -------------------------------- ------- >    ${speed}`);
-
         const choose = Math.random();
         const id = Date.now().toString();
         const coins = coin();
         const boosterCoins = booster();
+        const bomb = bombCoin();
         setCoinCounter(coinCounter + 1);
 
-        if (coinCounter !== 0 && coinCounter % 10 === 0) {
-            if (bombChance < 0.3) setBombChance(bombChance + 0.02);
+        if (coinCounter !== 0 && coinCounter % 2 === 0) {
+            if (bombChance < 0.3) {
+                setBombChance(bombChance + 0.02);
+            };
             if (boosterChance > 0.02) setBoosterChance(boosterChance - 0.02)
             if (speed > 200) setSpeed(speed - 10)
         }
 
-        const item = choose < boosterChance ?
-            <div className='w-[40px] h-[40px]'>
-                <img src={boosterCoins.item} alt="boost itme" className='w-full h-full object-cover' />
+
+        if (choose < bombChance) {
+            const tem = <div className='w-[40px] h-[40px]'>
+                <img src={bomb.item} alt="bomb item" className='w-full h-full object-cover' />
             </div>
-            :
-            <div className="w-[40px] h-[40px]">
+            setItem(tem)
+            setScore(bomb.score)
+            setUrl(bomb.item)
+        }
+        else if (choose < boosterChance + bombChance) {
+            const tem = <div className='w-[40px] h-[40px]'>
+                <img src={boosterCoins.item} alt="boost item" className='w-full h-full object-cover' />
+            </div>
+            setItem(tem)
+            setScore(boosterCoins.score)
+            setUrl(boosterCoins.item)
+        }
+        else {
+            const tem = <div className="w-[40px] h-[40px]">
                 <img src={coins.item} alt="item" className="w-full h-full object-cover w-[40px] h-[40px]" />
             </div>;
+            setItem(tem)
+            setScore(coins.score)
+            setUrl(coins.item)
+        }
 
-        console.log(`item ======================================================= ${choose < boosterChance ? boosterCoins.item : coins.item}`);
-        console.log(`choose ===================================================== ${choose}`);
+        console.log(`score ==================================================== ${score}`);
+        console.log(`url ====================================================== ${url}\n\n`);
 
         const location = Math.floor(Math.random() * 4);
-        // if (previousLocation !== location) {
-        setShowingItems((prevItems) => [...prevItems, { id, item, top: location % 2 ? 10 : 160, wid: 0, pos: location < 2 ? 0 : 1, location: location, score: choose < boosterChance ? boosterCoins.score : coins.score, url: choose < boosterChance ? boosterCoins.item : coins.item }]);
+        // if (previousLocation !== location || (previousLocation === location && typeof score != 'string')) {
+        setShowingItems((prevItems) => [...prevItems, { id, item, top: location % 2 ? 10 : 160, wid: 0, pos: location < 2 ? 0 : 1, location: location, score, url }]);
         // }
 
         // setPreviousLocation(location);
@@ -373,9 +444,7 @@ const Play = () => {
 
     useEffect(() => {
         if (!isGameRunning) return;
-
         generateCoins()
-
     }, [time]);
 
     ///////////////////////
@@ -407,11 +476,7 @@ const Play = () => {
                 prevItems
                     .map(({ id, item, top, wid, pos, location, score, url }) => ({ id, item, top: top + 17, wid: wid + 27, pos, location, score, url })) // Move items down
                     .filter(({ wid, score, location }) => {
-                        if (wid === 108) {
-                            if (showingItems.length <= 1) {
-                                console.log(`showingItems.length ================= ${showingItems.length}`)
-                                generateCoins()
-                            }
+                        if (wid === 108 && score !== 0) {
                             if (location === 1) {
                                 if (autoReceiveCount === 1 && autoReceivePosition === 1) {
                                     changePos(autoReceiveImage, autoReceiveCount, autoReceivePosition, wid);
