@@ -46,7 +46,6 @@ const Play = () => {
         return { item: items[type], score: itemScore[type] }
     };
 
-
     interface BoosterIcon {
         url: string;
         wid: number;
@@ -61,10 +60,13 @@ const Play = () => {
     const [autoReceiveCount, setAutoReceiveCount] = useState<number>(1);
     const [autoReceivePosition, setAutoReceivePosition] = useState<number>(1);
 
+    // const [generateMulti, setGenerateMulti] = useState(0);
+    let generateMulti = 0
+    const [generateSpeed, setGenerateSpeed] = useState(6000);
     const [speed, setSpeed] = useState(1500);
     const [previousLocation, setPreviousLocation] = useState(1000);
 
-    const [boosterChance, setBoosterChance] = useState(0.3);
+    const [boosterChance, setBoosterChance] = useState(0.1);
     const [coinCounter, setCoinCounter] = useState(0);
 
     const [showingItems, setShowingItems] = useState<{ id: string, item: React.ReactNode, wid: number, top: number, pos: number, location: number, score: any, url: any }[]>([]);
@@ -77,6 +79,7 @@ const Play = () => {
     const [boosterShield, setBoosterShield] = useState(false);
     const [boosterEffectx2, setBoosterEffectx2] = useState(false);
     const [boosterEffectup, setBoosterEffectup] = useState(false);
+
     const [boosterEffectSlow, setBoosterEffectSlow] = useState(false);
     const [boosterEffectShield, setBoosterEffectShield] = useState(false);
     const [isGameRunning, setIsGameRunning] = useState(true);
@@ -316,30 +319,30 @@ const Play = () => {
 
     }, [time]);
 
-
     /////////////////////////
-    //                   //
-    //     COIN          //
-    //    GENERATE       //
-    //                   //
-    //////////////////////////
+    //                     //
+    //       COIN          //
+    //      GENERATE       //
+    //                     //
+    /////////////////////////
 
-    useEffect(() => {
-        if (!isGameRunning) return;
+    const generateCoins = () => {
+        if (generateMulti === generateSpeed) return;
+        generateMulti = generateSpeed;
 
-        setTimeout(() => {
+        const interval = setTimeout(() => {
             setTime((pre) => pre + 1)
-        }, speed);
+            setGenerateSpeed(prev => prev - 5);
+        }, generateSpeed);
+
+        console.log(`generateSpeed -------------------------------- >    ${generateSpeed}`);
+        console.log(`speed -------------------------------- ------- >    ${speed}`);
 
         const choose = Math.random();
-
         const id = Date.now().toString();
         const coins = coin();
         const boosterCoins = booster();
-
         setCoinCounter(coinCounter + 1);
-
-        console.log(`speed >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> ${speed}`)
 
         if (coinCounter !== 0 && coinCounter % 10 === 0) {
             if (bombChance < 0.3) setBombChance(bombChance + 0.02);
@@ -356,11 +359,23 @@ const Play = () => {
                 <img src={coins.item} alt="item" className="w-full h-full object-cover w-[40px] h-[40px]" />
             </div>;
 
+        console.log(`item ======================================================= ${choose < boosterChance ? boosterCoins.item : coins.item}`);
+        console.log(`choose ===================================================== ${choose}`);
+
         const location = Math.floor(Math.random() * 4);
-        if (previousLocation !== location) {
-            setShowingItems((prevItems) => [...prevItems, { id, item, top: location % 2 ? 10 : 160, wid: 0, pos: location < 2 ? 0 : 1, location: location, score: choose < boosterChance ? boosterCoins.score : coins.score, url: choose < boosterChance ? boosterCoins.item : coins.item }]);
-        }
-        setPreviousLocation(location);
+        // if (previousLocation !== location) {
+        setShowingItems((prevItems) => [...prevItems, { id, item, top: location % 2 ? 10 : 160, wid: 0, pos: location < 2 ? 0 : 1, location: location, score: choose < boosterChance ? boosterCoins.score : coins.score, url: choose < boosterChance ? boosterCoins.item : coins.item }]);
+        // }
+
+        // setPreviousLocation(location);
+        return () => clearInterval(interval);
+    }
+
+    useEffect(() => {
+        if (!isGameRunning) return;
+
+        generateCoins()
+
     }, [time]);
 
     ///////////////////////
@@ -370,13 +385,12 @@ const Play = () => {
     //                   //
     ///////////////////////
 
-
-    useEffect(() => {
-        const dieResult = health.every((item) => item === 0);
-        if (dieResult) {
-            winOrFailModal('lose');
-        }
-    }, [health]);
+    // useEffect(() => {
+    //     const dieResult = health.every((item) => item === 0);
+    //     if (dieResult) {
+    //         winOrFailModal('lose');
+    //     }
+    // }, [health]);
 
     ///////////////////////
     //                   //
@@ -394,6 +408,10 @@ const Play = () => {
                     .map(({ id, item, top, wid, pos, location, score, url }) => ({ id, item, top: top + 17, wid: wid + 27, pos, location, score, url })) // Move items down
                     .filter(({ wid, score, location }) => {
                         if (wid === 108) {
+                            if (showingItems.length <= 1) {
+                                console.log(`showingItems.length ================= ${showingItems.length}`)
+                                generateCoins()
+                            }
                             if (location === 1) {
                                 if (autoReceiveCount === 1 && autoReceivePosition === 1) {
                                     changePos(autoReceiveImage, autoReceiveCount, autoReceivePosition, wid);
