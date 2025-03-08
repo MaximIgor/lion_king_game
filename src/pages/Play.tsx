@@ -30,7 +30,7 @@ import Dog from '@/assets/icons/items/dog.png' // 15%          score  3
 
 
 
-
+const firstCoin = `data:image/png;base64,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`
 
 
 const Play = () => {
@@ -97,7 +97,7 @@ const Play = () => {
     // const [generateMulti, setGenerateMulti] = useState(0);
     let generateMulti = 0;
     const [generateSpeed, setGenerateSpeed] = useState(6000);
-    const [speed, setSpeed] = useState(1500);
+    const [speed, setSpeed] = useState(1300);
     const [previousLocation, setPreviousLocation] = useState(1000);
 
     const [boosterChance, setBoosterChance] = useState(0.1);
@@ -203,7 +203,7 @@ const Play = () => {
                     //     prevItems.filter(it => it !== item) // Remove this coin
                     // );
                     console.log(`++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ ${item.score}`);
-                    
+
                     if (typeof item.score == `number`) {   // coin
                         if (currentScore + item.score >= fianllyScore) {
                             winOrFailModal('win');
@@ -377,9 +377,11 @@ const Play = () => {
     /////////////////////////
 
 
-    const [item, setItem] = useState<React.ReactNode>()
-    const [score, setScore] = useState<number | string>(0)
-    const [url, setUrl] = useState<string>()
+    const [score, setScore] = useState<number | string>(1)
+    const [url, setUrl] = useState<string>(firstCoin)
+    const [item, setItem] = useState<React.ReactNode>(<div className='w-[40px] h-[40px]'>
+        <img src={url} alt="boost item" className='w-full h-full object-cover' />
+    </div>)
     const generateCoins = () => {
         if (generateMulti === generateSpeed) return;
         generateMulti = generateSpeed;
@@ -396,7 +398,7 @@ const Play = () => {
         const bomb = bombCoin();
         setCoinCounter(coinCounter + 1);
 
-        if (coinCounter !== 0 && coinCounter % 2 === 0) {
+        if (coinCounter !== 0 && coinCounter % 10 === 0) {
             if (bombChance < 0.3) {
                 setBombChance(bombChance + 0.02);
             };
@@ -404,6 +406,10 @@ const Play = () => {
             if (speed > 200) setSpeed(speed - 10)
         }
 
+        console.log(`choose -----------------------------------------------------------------------------------------${choose}`)
+        console.log(`speed ------------------------------------------------------------------------------------------${speed}`)
+        console.log(`bombChance -------------------------------------------------------------------------------------${bombChance}`)
+        console.log(`boosterChance -----------------------------------------------------------------------------------${boosterChance}`)
 
         if (choose < bombChance) {
             const tem = <div className='w-[40px] h-[40px]'>
@@ -430,9 +436,6 @@ const Play = () => {
             setUrl(coins.item)
         }
 
-        console.log(`score ==================================================== ${score}`);
-        console.log(`url ====================================================== ${url}\n\n`);
-
         const location = Math.floor(Math.random() * 4);
         // if (previousLocation !== location || (previousLocation === location && typeof score != 'string')) {
         setShowingItems((prevItems) => [...prevItems, { id, item, top: location % 2 ? 10 : 160, wid: 0, pos: location < 2 ? 0 : 1, location: location, score, url }]);
@@ -454,12 +457,12 @@ const Play = () => {
     //                   //
     ///////////////////////
 
-    // useEffect(() => {
-    //     const dieResult = health.every((item) => item === 0);
-    //     if (dieResult) {
-    //         winOrFailModal('lose');
-    //     }
-    // }, [health]);
+    useEffect(() => {
+        const dieResult = health.every((item) => item === 0);
+        if (dieResult) {
+            winOrFailModal('lose');
+        }
+    }, [health]);
 
     ///////////////////////
     //                   //
