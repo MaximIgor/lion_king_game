@@ -94,9 +94,11 @@ const Play = () => {
     const [autoReceiveCount, setAutoReceiveCount] = useState<number>(1);
     const [autoReceivePosition, setAutoReceivePosition] = useState<number>(1);
 
-    // const [generateMulti, setGenerateMulti] = useState(0);
     let generateMulti = 0;
     const [generateSpeed, setGenerateSpeed] = useState(6000);
+    const [generateEvent, setGenerateEvent] = useState(0);
+    const [currentShowItems, setCurrentShowItems] = useState(1);
+
     const [speed, setSpeed] = useState(1300);
     const [previousLocation, setPreviousLocation] = useState(1000);
 
@@ -185,8 +187,6 @@ const Play = () => {
         setAutoReceiveCount(count);
         setAutoReceivePosition(position);
 
-
-
         // 1 : 1 = 1
         // 1 : -1 = 0
         // -1 : 1 = 3
@@ -202,8 +202,6 @@ const Play = () => {
                     // setShowingItems((prevItems) =>
                     //     prevItems.filter(it => it !== item) // Remove this coin
                     // );
-                    console.log(`++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ ${item.score}`);
-
                     if (typeof item.score == `number`) {   // coin
                         if (currentScore + item.score >= fianllyScore) {
                             winOrFailModal('win');
@@ -298,7 +296,8 @@ const Play = () => {
                             })
                         }
                     }
-                    setShowingItems(prevItem => prevItem.filter(it => it !== item))
+                    setShowingItems(prevItem => prevItem.filter(it => it !== item));
+                    setGenerateEvent(prev => prev + 1);
                 }
             }
         })
@@ -381,7 +380,8 @@ const Play = () => {
     const [url, setUrl] = useState<string>(firstCoin)
     const [item, setItem] = useState<React.ReactNode>(<div className='w-[40px] h-[40px]'>
         <img src={url} alt="boost item" className='w-full h-full object-cover' />
-    </div>)
+    </div>);
+
     const generateCoins = () => {
         if (generateMulti === generateSpeed) return;
         generateMulti = generateSpeed;
@@ -398,6 +398,8 @@ const Play = () => {
         const bomb = bombCoin();
         setCoinCounter(coinCounter + 1);
 
+        if (coinCounter !== 0 && coinCounter % 20 === 0)
+            setCurrentShowItems(prev => prev + 1)
         if (coinCounter !== 0 && coinCounter % 10 === 0) {
             if (bombChance < 0.3) {
                 setBombChance(bombChance + 0.02);
@@ -409,7 +411,7 @@ const Play = () => {
         console.log(`choose -----------------------------------------------------------------------------------------${choose}`)
         console.log(`speed ------------------------------------------------------------------------------------------${speed}`)
         console.log(`bombChance -------------------------------------------------------------------------------------${bombChance}`)
-        console.log(`boosterChance -----------------------------------------------------------------------------------${boosterChance}`)
+        console.log(`boosterChance ----------------------------------------------------------------------------------${boosterChance}`)
 
         if (choose < bombChance) {
             const tem = <div className='w-[40px] h-[40px]'>
@@ -447,8 +449,9 @@ const Play = () => {
 
     useEffect(() => {
         if (!isGameRunning) return;
+        if (showingItems.length === currentShowItems) return;
         generateCoins()
-    }, [time]);
+    }, [time, generateEvent]);
 
     ///////////////////////
     //                   //
